@@ -130,6 +130,9 @@ class GeometrySolver (object):
         for g in self.geometry:
             g.draw()
     
+    def is_satisfied(self):
+        return all(eqn() < 1.0e-6 for eqn in self.eqns)
+    
 #    def __str__(self):
 #        return 'GeomSolver:' \
 #             + '\n    Vars:\n        ' \
@@ -238,6 +241,7 @@ def main():
         solver.update()
         t = timeit.default_timer() - t
         print(t)
+        print(solver.is_satisfied())
         solver.draw()
         plt.axis('equal')
     

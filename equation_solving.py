@@ -120,15 +120,15 @@ class EqnSet (object):
             
         f_eqns -= self.eqns
         
-        print( ','.join(sorted(eqn.name for eqn in self.eqns)) 
-               + '('  + str(len(self.eqns))
-               + ')(' + str(len(self.vars))
-               + ')' + ' -> ' 
-               + ','.join(sorted(eqn.name for eqn in f_eqns))
-               + '\n => \n'
-               + '\n'.join([str(sorted(eq.name for eq in self.copy().add(eqn).eqns)) 
-                          for eqn in f_eqns])
-               + '\n' )
+#        print( ','.join(sorted(eqn.name for eqn in self.eqns)) 
+#               + '('  + str(len(self.eqns))
+#               + ')(' + str(len(self.vars))
+#               + ')' + ' -> ' 
+#               + ','.join(sorted(eqn.name for eqn in f_eqns))
+#               + '\n => \n'
+#               + '\n'.join([str(sorted(eq.name for eq in self.copy().add(eqn).eqns)) 
+#                          for eqn in f_eqns])
+#               + '\n' )
         
         ## use those equations to create reachable equation sets
 
@@ -221,6 +221,7 @@ def split_equation_set(eqn_set):
     
     # keep track of what has been visited
     unique_eqn_combos = set()
+    unsolved_eqns     = set(eqn_set.eqns)
     
     ## Initialize priority queue with the equations in the input set
     pq = [EqnSet().add(eqn) for eqn in eqn_set.eqns]
@@ -235,6 +236,7 @@ def split_equation_set(eqn_set):
             # set this equation set as solved
             solve_sets.add(eqn_set)
             eqn_set.set_solved()
+            unsolved_eqns.difference_update(eqn_set.eqns)
 
             # discard this equation set from all sets in the pq
             # TODO: use map() ?
@@ -246,7 +248,7 @@ def split_equation_set(eqn_set):
             pq = filter(lambda p: not p.is_empty(), pq)
             pq.sort( key=lambda p: p.key(nEq) )
             
-            unique_eqn_combos = set()
+            unique_eqn_combos = set(frozenset(eqs.eqns | eqs.vars) for eqs in pq)
 
         else:
             # add the frontier to the pq
@@ -261,13 +263,15 @@ def split_equation_set(eqn_set):
             # TODO: insert from the frontier in order (maybe a heap)
             #   to eliminate this sort...
             pq.sort( key=lambda p: p.key(nEq) )
-            
-            if not pq:
-                # this is the final (underconstrained) system
-                solve_sets.add(eqn_set)
-                eqn_set.set_solved()
-                underconstrained_set = eqn_set
-    
+
+    # create eqn set(s) of underconstrained systems
+    underconstrained_set = EqnSet()
+    for eqn in unsolved_eqns:
+        underconstrained_set.add(eqn)
+
+    underconstrained_set.set_solved()
+
+
     return solve_sets, underconstrained_set
 
 def solve_eqn_sets(solve_sets, modified_vars):
