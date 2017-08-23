@@ -8,7 +8,7 @@ TODO: keep abs() or should sign of parameters matter?
 
 from __future__ import division, print_function
 
-from math import *
+from math import hypot, atan2, pi
 
 #--------------------------------------------------------------------
 # basic
@@ -99,11 +99,11 @@ def line_length(x, d):
 #--------------------------------------------------------------------
 #--------------------------------------------------------------------
 
-import numpy as np
-import scipy.optimize as opt
-import matplotlib.pyplot as plt
-
 def main():
+#    import numpy as np
+    import scipy.optimize as opt
+    import matplotlib.pyplot as plt
+    
     # x_list = np.zeros(4)
     # y_list = np.zeros(4)
     # r_list = np.zeros(1)
@@ -153,7 +153,7 @@ def main():
     print(XF)
     # print(sol)
 
-    fig = plt.figure()
+    plt.figure()
 
     plt.scatter(x=(x0, x1, x2, x3, x4), y=(y0, y1, y2, y3, y4))
     L1 = plt.Line2D(xdata=(x3, x2), ydata=(y3, y2))

@@ -8,7 +8,7 @@ TODO: add dependence on sign of parameter!!!!
 
 from __future__ import division, print_function
 
-from math import *
+from math import hypot, atan2, pi
 
 #--------------------------------------------------------------------
 # basic
@@ -68,7 +68,8 @@ def angle_point3(x, a):
 def angle_point2(x, a):
     (x1, y1, x2, y2) = x
 
-    return abs( atan2(x3 - x2, y3 - y2) ) - a
+    # TODO: make this constraint signed?
+    return abs( atan2(x1 - x2, y1 - y2) ) - a
 
 def point_on_line(x, p=None):
     # 3rd point is the point
@@ -99,11 +100,11 @@ def line_length(x, d):
 #--------------------------------------------------------------------
 #--------------------------------------------------------------------
 
-import numpy as np
-import scipy.optimize as opt
-import matplotlib.pyplot as plt
-
 def main():
+#    import numpy as np
+    import scipy.optimize as opt
+    import matplotlib.pyplot as plt
+    
     # x_list = np.zeros(4)
     # y_list = np.zeros(4)
     # r_list = np.zeros(1)
@@ -153,7 +154,7 @@ def main():
     print(XF)
     # print(sol)
 
-    fig = plt.figure()
+    plt.figure()
 
     plt.scatter(x=(x0, x1, x2, x3, x4), y=(y0, y1, y2, y3, y4))
     L1 = plt.Line2D(xdata=(x3, x2), ydata=(y3, y2))

@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 #import heapq
+#import bisect # insort
 
 from constraint_solver import solve_numeric
 
@@ -111,8 +112,7 @@ class EqnSet (object):
         '''Return a set of EqnSets that are reachable from this one'''
         
         ## create set of all reachable equations
-        # TODO: precompute frontier eqns
-        
+
         f_eqns = set()
         
         for var in self.vars:
@@ -120,18 +120,8 @@ class EqnSet (object):
             
         f_eqns -= self.eqns
         
-#        print( ','.join(sorted(eqn.name for eqn in self.eqns)) 
-#               + '('  + str(len(self.eqns))
-#               + ')(' + str(len(self.vars))
-#               + ')' + ' -> ' 
-#               + ','.join(sorted(eqn.name for eqn in f_eqns))
-#               + '\n => \n'
-#               + '\n'.join([str(sorted(eq.name for eq in self.copy().add(eqn).eqns)) 
-#                          for eqn in f_eqns])
-#               + '\n' )
-        
         ## use those equations to create reachable equation sets
-
+        
         for eqn in f_eqns:
             yield self.copy().add(eqn)
     
@@ -145,7 +135,7 @@ class EqnSet (object):
     
     def key(self, nEq):
         '''Return the sorting key - value sets with fewer equations'''
-        return len(self.vars) - len(self.eqns) * (1 + 1.0/nEq)
+        return - ( len(self.vars) - len(self.eqns) * (1 + 1.0/nEq) )
     
     def is_solvable(self):
         '''Does the number of equations equal the number of variables'''
@@ -181,17 +171,6 @@ class EqnSet (object):
 
 #------------------------------------------------------------------------------
 
-#class EquationSolver (object):
-#    def __init__(self):
-#        self.vars = set()
-#        self.eqns = set()
-#        
-#        self.reset()
-#    
-#    def reset(self):
-
-#------------------------------------------------------------------------------
-
 # TODO: keep track of the set of solved equations.
 #   when the solve queue is empty, use this to get the 
 #   unsolved equations. use the connections between these
@@ -211,7 +190,8 @@ class EqnSet (object):
 # add optional sympy representation of constraints
 # optional sympy solver??
 
-def split_equation_set(eqn_set):
+# original
+def split_equation_set_v1(eqn_set):
     '''Split an equation set up into smaller solvable equation sets'''
     
     nEq = len(eqn_set.eqns)
@@ -229,9 +209,8 @@ def split_equation_set(eqn_set):
     
     
     while pq:
-        eqn_set = pq.pop(0)
+        eqn_set = pq.pop()
         
-        # TODO: if multiple are solvable, solve them all and then update pq for speed
         if eqn_set.is_solvable():
             # set this equation set as solved
             solve_sets.add(eqn_set)
@@ -239,12 +218,10 @@ def split_equation_set(eqn_set):
             unsolved_eqns.difference_update(eqn_set.eqns)
 
             # discard this equation set from all sets in the pq
-            # TODO: use map() ?
             for p in pq:
                 p.discard(eqn_set)
 
             # delete any empty eqn sets and re-sort the pq
-            # hmm, can make use of unique_eqn_combos here a bit maybe kinda?
             pq = filter(lambda p: not p.is_empty(), pq)
             pq.sort( key=lambda p: p.key(nEq) )
             
@@ -252,16 +229,12 @@ def split_equation_set(eqn_set):
 
         else:
             # add the frontier to the pq
-            # TODO: got some weird issues here?
-#            pq.extend(eqn_set.frontier())
-            
             for eqs in eqn_set.frontier():
-                if (frozenset(eqs.eqns | eqs.vars)) not in unique_eqn_combos:
-                    unique_eqn_combos.add(frozenset(eqs.eqns | eqs.vars))
-                    pq.append(eqs)
+                eqn_combo = frozenset(eqs.eqns | eqs.vars)
+                if eqn_combo not in unique_eqn_combos:
+                    unique_eqn_combos.add(eqn_combo)
+                    pq.add(eqs)
                     
-            # TODO: insert from the frontier in order (maybe a heap)
-            #   to eliminate this sort...
             pq.sort( key=lambda p: p.key(nEq) )
 
     # create eqn set(s) of underconstrained systems
@@ -274,6 +247,132 @@ def split_equation_set(eqn_set):
 
     return solve_sets, underconstrained_set
 
+# version that tries to solve many eqn sets at a time
+def split_equation_set_v2(eqn_set):
+    '''Split an equation set up into smaller solvable equation sets'''
+    
+    nEq = len(eqn_set.eqns)
+    
+    solve_sets = set()
+    underconstrained_set = EqnSet()
+    
+    # keep track of what has been visited
+    unique_eqn_combos = set()
+    unsolved_eqns     = set(eqn_set.eqns)
+    
+    ## Initialize priority queue with the equations in the input set
+    pq = [EqnSet().add(eqn) for eqn in eqn_set.eqns]
+    pq.sort( key=lambda p: p.key(nEq) )
+    
+    
+    while pq:
+        # try to solve as many eqn sets as possible
+        eqn_set = None
+        while pq and pq[-1].is_solvable():
+            eqn_set = pq.pop()
+            
+            # set this equation set as solved
+            solve_sets.add(eqn_set)
+            eqn_set.set_solved()
+            unsolved_eqns.difference_update(eqn_set.eqns)
+
+            # discard this equation set from all sets in the pq
+            for p in pq:
+                p.discard(eqn_set)
+        
+        # then sort the pq if solves happened, otherwise add to the pq
+        if eqn_set:
+            # delete any empty eqn sets and re-sort the pq
+            pq = filter(lambda p: not p.is_empty(), pq)
+            pq.sort( key=lambda p: p.key(nEq) )
+            
+            unique_eqn_combos = set(frozenset(eqs.eqns | eqs.vars) for eqs in pq)
+            
+        else:
+            eqn_set = pq.pop()
+            
+            # add the frontier to the pq
+            for eqs in eqn_set.frontier():
+                eqn_combo = frozenset(eqs.eqns | eqs.vars)
+                if eqn_combo not in unique_eqn_combos:
+                    unique_eqn_combos.add(eqn_combo)
+                    pq.add(eqs)
+            
+            pq.sort( key=lambda p: p.key(nEq) )
+
+
+    # create eqn set(s) of underconstrained systems
+    underconstrained_set = EqnSet()
+    for eqn in unsolved_eqns:
+        underconstrained_set.add(eqn)
+
+    underconstrained_set.set_solved()
+
+
+    return solve_sets, underconstrained_set
+
+# version using blist.sortedlist
+import blist
+def split_equation_set_v3(eqn_set):
+    '''Split an equation set up into smaller solvable equation sets'''
+    
+    nEq = len(eqn_set.eqns)
+    
+    solve_sets = set()
+    underconstrained_set = EqnSet()
+    
+    # keep track of what has been visited
+    unique_eqn_combos = set()
+    unsolved_eqns     = set(eqn_set.eqns)
+    
+    ## Initialize priority queue with the equations in the input set
+    pq = blist.sortedlist([EqnSet().add(eqn) for eqn in eqn_set.eqns],
+                          key=lambda p: p.key(nEq))
+    
+    while pq:
+        eqn_set = pq.pop()
+        
+        if eqn_set.is_solvable():
+            # set this equation set as solved
+            solve_sets.add(eqn_set)
+            eqn_set.set_solved()
+            unsolved_eqns.difference_update(eqn_set.eqns)
+
+            # discard this equation set from all sets in the pq
+            for p in pq:
+                p.discard(eqn_set)
+
+            # delete any empty eqn sets and re-sort the pq
+            pq = blist.sortedlist(filter(lambda p: not p.is_empty(), pq),
+                                  key=lambda p: p.key(nEq))
+            
+            unique_eqn_combos = set(frozenset(eqs.eqns | eqs.vars) for eqs in pq)
+
+        else:
+            # add the frontier to the pq
+            for eqs in eqn_set.frontier():
+                eqn_combo = frozenset(eqs.eqns | eqs.vars)
+                if eqn_combo not in unique_eqn_combos:
+                    unique_eqn_combos.add(eqn_combo)
+                    pq.add(eqs)
+
+    # create eqn set(s) of underconstrained systems
+    underconstrained_set = EqnSet()
+    for eqn in unsolved_eqns:
+        underconstrained_set.add(eqn)
+
+    underconstrained_set.set_solved()
+
+
+    return solve_sets, underconstrained_set
+
+
+split_equation_set = split_equation_set_v3
+
+
+#------------------------------------------------------------------------------ 
+
+
 def solve_eqn_sets(solve_sets, modified_vars):
     '''
     Solve a group of equation sets in which only certain variables
@@ -285,6 +384,7 @@ def solve_eqn_sets(solve_sets, modified_vars):
     
     # start queue with all sets that don't require any vars to be solved
     q = [eqs for eqs in solve_sets if not eqs.requires]
+    q = blist.blist(q) # use blist instead of list
     
     while q:
         # get the next set that is ready to solve
@@ -307,13 +407,12 @@ def solve_eqn_sets(solve_sets, modified_vars):
         #  1) don't look at eqn set if it has already been looked at
         #  2) keep track of linked list b/n eqn sets directly
         frontier = set()
-        # TODO: this where f11 and f12 make it back in?
         [ frontier.update(                                     # add to the frontier
                 eqs for eqs in var.required_by                 # all eqn sets required by by the var
                 if all(v in solved_vars for v in eqs.requires) # if all other required vars have been solved for
             ) for var in eqn_set.solves ]                      # for each var solved by this eqn set
-    
-        q += list(frontier)
+
+        q += frontier
         
         # TODO: deal with underconstrained eqn set
         #   also, what about sets with deleted vars or constraints?

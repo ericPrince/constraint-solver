@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt # TODO: add/remove this for profiling
 
 from equation_solving import Eqn, Var
 
@@ -152,9 +152,9 @@ class CoincidentPoint2 (Constraint):
 
 #----------------------------------------------------------
 
-import equation_solving as solver
-
 def main():
+    import matplotlib.pyplot as plt
+    import equation_solving as solver
     from math import pi
 
     r0 = 1.5
