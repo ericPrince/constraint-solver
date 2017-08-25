@@ -1,4 +1,4 @@
-#import matplotlib.pyplot as plt # TODO: add/remove this for profiling
+import matplotlib.pyplot as plt # TODO: add/remove this for profiling
 
 from equation_solving import Eqn, Var
 

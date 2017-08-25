@@ -277,7 +277,7 @@ def split_equation_set(eqn_set):
                 p.discard(eqn_set)
 
             # delete any empty eqn sets and re-sort the pq
-            pq = sortedlist(filter(None, pq), 
+            pq = sortedlist(filter(lambda p: not p.is_empty(), pq), 
                             key=lambda p: p.key(nEq))
             
             unique_eqn_combos = set(frozenset(eqs.eqns | eqs.vars) for eqs in pq)
@@ -345,7 +345,7 @@ def solve_eqn_sets(solve_sets, modified_vars):
         
         # solve the eqn_set *if necessary*
         if (        any(var in eqn_set.requires for var in modified_vars)
-                or (any(var in eqn_set.solves for var in modified_vars) 
+                or (any(var in eqn_set.solves   for var in modified_vars) 
                     and not eqn_set.is_satisfied()) ):
             
             if not solve_eqn_set(eqn_set):

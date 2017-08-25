@@ -170,6 +170,12 @@ class GeometrySolver (object):
     
     def solve(self):
         """Solve all equation sets"""
+        print('~~~~~')
+        print(len(self.eqn_sets))
+        print(len(self.uc_set.eqns))
+        print(self.uc_set.is_solvable())
+        print(len(self.uc_set.vars))
+        print('~~~~~')
         solve_eqn_sets(self.eqn_sets, self.modified_vars)
         self.modified_vars = set()  
     
@@ -196,6 +202,9 @@ class GeometrySolver (object):
         
         self.modified    = False
         self.modified_uc = True
+    
+#    def reset_uc(self):
+#        pass
     
     #--------------------------------------------
     # display
@@ -229,8 +238,9 @@ class GeometrySolver (object):
     
 def main():
     import timeit
-#    import matplotlib.pyplot as plt
-#    from matplotlib import animation
+    import sys
+    import matplotlib.pyplot as plt
+    from matplotlib import animation
     import geom2d
     
     geometry, variables, constraints, all_vars = geom2d.problem2()
@@ -247,56 +257,41 @@ def main():
         solver.add_constraint(c)
     
     # unsolved system
-#    solver.draw()
-#    plt.axis('equal')
-#    plt.show()
+    solver.draw()
+    plt.axis('equal')
+    plt.show()
     
     # solved system
     solver.update()
-#    solver.draw()
-#    plt.axis('equal')
-#    plt.show()
+    solver.draw()
+    plt.axis('equal')
+    plt.show()
     
     # change circle radius
-    solver.modify_set_constraint(constraints[2], 1.0)
+    solver.modify_set_constraint(constraints[2], 1.0) # TODO?
     solver.update()
-#    solver.draw()
-#    plt.axis('equal')
-#    plt.show()
+    print(solver.is_satisfied())
+    solver.draw()
+    plt.axis('equal')
+    sys.stdout.flush()
+    plt.show()
     
     # delete a constraint
-#    solver.delete_constraint(constraints[12]) # f15: line length
-#    solver.delete_constraint(constraints[9]) # f11: tangent line circle
-
-    solver.delete_constraint(constraints[-1]) # TODO: why hang w/ -1,-2 (f19: set dy)
-#    solver.delete_constraint(constraints[7]) # f9: set y dist to dy
+#    cstr_del = constraints[-1] # f19: set dy
+#    cstr_del = constraints[12] # f15: line length
+#    cstr_del = constraints[9] #  f11: tangent line circle
+#    cstr_del = constraints[7] #  f9:  set y dist to dy
+    cstr_del = constraints[10] # f12: point on circle
     
-#    solver.delete_constraint(constraints[10]) # f12: point on circle
-    
-    solver.reset()
-#    print(solver)
-#    sys.stdout.flush()
+    solver.delete_constraint(cstr_del)
 
     # animate (and time)
     MAX = 1.0
     N = 100
     
-#    fig = plt.figure()
-#    def animate(f):
-#        fig.clear()
-#        t = timeit.default_timer()
-#        solver.modify_set_constraint(constraints[2], (MAX * (f + 1))/(N + 1))
-#        solver.update()
-#        t = timeit.default_timer() - t
-#        print(t)
-#        print(solver.is_satisfied())
-#        solver.draw()
-#        plt.axis('equal')
-#    
-#    anim = animation.FuncAnimation(fig, animate, xrange(N), repeat=False)
-#    plt.show()
-    
-    for f in xrange(N):
+    fig = plt.figure()
+    def animate(f):
+        fig.clear()
         t = timeit.default_timer()
         
         solver.modify_set_constraint(constraints[2], (MAX * (f + 1))/(N + 1))
@@ -307,13 +302,59 @@ def main():
         print(t)
         print(solver.is_satisfied())
         print('-----')
+        
+        solver.draw()
+        plt.axis('equal')
+    
+    anim = animation.FuncAnimation(fig, animate, xrange(N), repeat=False)
+    plt.show()
+    
+    sys.stdout.flush()
+    
+#    for f in xrange(N):
+#        t = timeit.default_timer()
+#        
+#        solver.modify_set_constraint(constraints[2], (MAX * (f + 1))/(N + 1))
+#        solver.update()
+#        
+#        t = timeit.default_timer() - t
+#        
+#        print(t)
+#        print(solver.is_satisfied())
+#        print('-----')
+
+
+    # TODO: adding a constraint has issues with update because
+    #   the solves/requires aspects of vars have already been set
+
+    # add back the deleted constraint
+    solver.add_constraint(geom2d.PointOnCircle('f12', geometry[3], geometry[4]))
+#    for eqn in cstr_del.equations:
+#        eqn.vars     = set(eqn.var_list)
+#        eqn.all_vars = set(eqn.var_list)
+#    solver.add_constraint(cstr_del) # TODO!
+    solver.modified = True # TODO: issue has to do with variables/eqns in uc set not being reset!
+#    solver.reset()
+    print('++++')          #   but also need to improve robustness of solver
+    print(len(solver.uc_set.vars))
+    print('++++')
+#    for eqn in solver.uc_set.eqns:
+#        for var in solver.uc_set.vars:
+#            if var in eqn.all_vars:
+#                eqn.vars.add(var)
+    solver.update()
+    print(solver.is_satisfied())
+    solver.draw()
+    plt.axis('equal')
+    sys.stdout.flush()
+    plt.show()
 
     # delete the circle (c1)
-#    solver.delete_geometry(geometry[4])
-#    solver.update()
-#    solver.draw()
-#    plt.axis('equal')
-#    plt.show()
+    solver.delete_geometry(geometry[4])
+    solver.update()
+    solver.draw()
+    plt.axis('equal')
+    plt.show()
     
 if __name__ == '__main__':
     main()
