@@ -310,6 +310,13 @@ def split_equation_set(eqn_set):
 def solve_eqn_set(eqn_set):
     """Solve a single equation set"""
     # TODO: add other methods (ie analytic, sympy, ...)
+    
+#    # if 1 equation and 1 variable, use the exact solution?
+#    if len(eqn_set.eqns) == 1 and len(eqn_set.solves) == 1:
+#        for eqn in eqn_set.eqns:
+#            eqn.var_list[0].val -= eqn()
+#            return True
+    
     return solve_numeric(eqn_set, 1.0e-8)
 
 def solve_eqn_sets(solve_sets, modified_vars):

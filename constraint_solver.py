@@ -39,7 +39,8 @@ def solve_numeric(eqn_set, ftol=1.0e-10):
         # TODO: added ability to solve underconstrained systems
         return [eqn() for eqn in eqn_list] + [0.0]*(len(var_list) - len(eqn_list))
 
-    sol = opt.root(F, V0, args=(), method='hybr') # 'hybr' or 'krylov' work?
+    # solve methods: hybr, lm, (krylov used to work)
+    sol = opt.root(F, V0, args=(), method='lm')
     VF = sol.x
 
     return all(abs(f) < ftol for f in F(VF))
