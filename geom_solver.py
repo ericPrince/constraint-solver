@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from equation_solving import EqnSet, split_equation_set, solve_eqn_sets
+#from equation_solving_parallel import solve_eqn_sets
 
 class GeometrySolver (object):
     __slots__ = ( 'vars',          # all vars
