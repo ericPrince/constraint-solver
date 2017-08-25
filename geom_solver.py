@@ -202,6 +202,7 @@ class GeometrySolver (object):
         
         self.modified    = False
         self.modified_uc = True
+        self.modified_vars = set(self.vars)
     
 #    def reset_uc(self):
 #        pass
@@ -268,9 +269,31 @@ def main():
     plt.show()
     
     # change circle radius
-    solver.modify_set_constraint(constraints[2], 1.0) # TODO?
+    solver.modify_set_constraint(constraints[2], 0.75) # TODO?
+    solver.delete_constraint(constraints[10])
+#    solver.add_constraint(geom2d.PointOnCircle('f12', geometry[3], geometry[4]))
+#    solver.modified=True
+#    solver.reset()
     solver.update()
     print(solver.is_satisfied())
+    print('@@@@@@@@')
+    for eqn_set in solver.eqn_sets:
+        print(sorted(eqn.name for eqn in eqn_set.eqns))
+    print('@@@@@@@@')
+    solver.draw()
+    plt.axis('equal')
+    sys.stdout.flush()
+    plt.show()
+    
+#    solver.modify_set_constraint(constraints[2], 0.74)
+    solver.add_constraint(geom2d.PointOnCircle('f12', geometry[3], geometry[4]))
+    solver.modified = True
+    solver.update()
+    print(solver.is_satisfied())
+    print('@@@@@@@@')
+    for eqn_set in solver.eqn_sets:
+        print(sorted(eqn.name for eqn in eqn_set.eqns))
+    print('@@@@@@@@')
     solver.draw()
     plt.axis('equal')
     sys.stdout.flush()
@@ -283,7 +306,7 @@ def main():
 #    cstr_del = constraints[7] #  f9:  set y dist to dy
     cstr_del = constraints[10] # f12: point on circle
     
-    solver.delete_constraint(cstr_del)
+#    solver.delete_constraint(cstr_del)
 
     # animate (and time)
     MAX = 1.0
@@ -328,7 +351,8 @@ def main():
     #   the solves/requires aspects of vars have already been set
 
     # add back the deleted constraint
-    solver.add_constraint(geom2d.PointOnCircle('f12', geometry[3], geometry[4]))
+#    solver.add_constraint(geom2d.PointOnCircle('f12', geometry[3], geometry[4]))
+
 #    for eqn in cstr_del.equations:
 #        eqn.vars     = set(eqn.var_list)
 #        eqn.all_vars = set(eqn.var_list)
@@ -344,6 +368,10 @@ def main():
 #                eqn.vars.add(var)
     solver.update()
     print(solver.is_satisfied())
+    print('@@@@@@@@')
+    for eqn_set in solver.eqn_sets:
+        print(sorted(eqn.name for eqn in eqn_set.eqns))
+    print('@@@@@@@@')
     solver.draw()
     plt.axis('equal')
     sys.stdout.flush()
