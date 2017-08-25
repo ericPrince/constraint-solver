@@ -1,9 +1,9 @@
-#import threading
-import multiprocessing as mp
-#try:
-#    import queue
-#except:
-#    import Queue as queue
+import threading
+
+try:
+    import queue
+except:
+    import Queue as queue
 
 from constraint_solver import solve_numeric
 
@@ -17,12 +17,7 @@ def solve_eqn_set(eqn_set):
     return solve_numeric(eqn_set, 1.0e-8)
 
 
-all_success   = True
-modified_vars = set()
-solved_vars   = set()
-
-
-# TODO: threading couldddd work, but need lock on optimize.root
+# TODO: threading couldddd work, but need lock on optimize.root if hybr solver
 
 def solve_eqn_sets(solve_sets, modified_var_set):
     """
@@ -30,67 +25,54 @@ def solve_eqn_sets(solve_sets, modified_var_set):
     have been modified.
     """
     
-    global all_success, modified_vars, solved_vars
-    
-    all_success   = True
-    modified_vars = set(modified_var_set)
-    solved_vars   = set()
-    
     # `q` represents the equation sets that are ready to be solved now
-#    q = queue.Queue()
-    q = mp.JoinableQueue()
+    q = queue.Queue()
     
-#    class Solve_eqn_sets (threading.Thread):
-#    class Solve_eqn_sets (mp.Process):
-#        all_success   = True
-#        modified_vars = set(modified_var_set)
-#        solved_vars   = set()
+    class Solve_eqn_sets (threading.Thread):
+        all_success   = True
+        modified_vars = set(modified_var_set)
+        solved_vars   = set()
     
-    def work(self):
-        global all_success, modified_vars, solved_vars
+        def run(self):
+            # TODO: while loop end condition?
+            while True:
+                # get the next set that is ready to solve
+                eqn_set = q.get()
+                
+                # solve the eqn_set *if necessary*
+                if (        any(var in eqn_set.requires for var in Solve_eqn_sets.modified_vars)
+                        or (any(var in eqn_set.solves for var in Solve_eqn_sets.modified_vars) 
+                            and not eqn_set.is_satisfied()) ):
+                    
+                    if not solve_eqn_set(eqn_set):
+                        Solve_eqn_sets.all_success = False
+                        print('FAIL')
+                    
+                    Solve_eqn_sets.modified_vars |= eqn_set.solves
+                
+                # add all vars solved by this set to the set of solved vars
+                Solve_eqn_sets.solved_vars |= eqn_set.solves
+                
+                # create the frontier to add to the queue
+                # TODO: much more efficient way to get the frontier
+                #  1) don't look at eqn set if it has already been looked at
+                #  2) keep track of linked list b/n eqn sets directly
+                frontier = set()
+                [ frontier.update(                                     # add to the frontier
+                        eqs for eqs in var.required_by                 # all eqn sets required by by the var
+                        if all(v in Solve_eqn_sets.solved_vars for v in eqs.requires) # if all other required vars have been solved for
+                    ) for var in eqn_set.solves ]                      # for each var solved by this eqn set
         
-        while True:
-            # get the next set that is ready to solve
-            eqn_set = q.get()
-            
-            # solve the eqn_set *if necessary*
-            if (        any(var in eqn_set.requires for var in modified_vars)
-                    or (any(var in eqn_set.solves for var in modified_vars) 
-                        and not eqn_set.is_satisfied()) ):
+                for eqs in frontier:
+                    q.put(eqs)
                 
-                if not solve_eqn_set(eqn_set):
-                    all_success = False
-                    print('FAIL')
-                
-                modified_vars |= eqn_set.solves
-            
-            # add all vars solved by this set to the set of solved vars
-            solved_vars |= eqn_set.solves
-            
-            # create the frontier to add to the queue
-            # TODO: much more efficient way to get the frontier
-            #  1) don't look at eqn set if it has already been looked at
-            #  2) keep track of linked list b/n eqn sets directly
-            frontier = set()
-            [ frontier.update(                                     # add to the frontier
-                    eqs for eqs in var.required_by                 # all eqn sets required by by the var
-                    if all(v in solved_vars for v in eqs.requires) # if all other required vars have been solved for
-                ) for var in eqn_set.solves ]                      # for each var solved by this eqn set
-    
-            for eqs in frontier:
-                q.put(eqs)
-            
-            q.task_done()
+                q.task_done()
     
     # create the thread pool
-    for _ in range(1):
-#        t = threading.Thread(target=work)
-        t = mp.Process(target=work)
+    for _ in range(4):
+        t = Solve_eqn_sets()
         t.daemon = True
         t.start()
-    
-#    p = mp.Pool(4)
-#    p.apply_async()
     
     # start up the queue
     for eqs in solve_sets:
