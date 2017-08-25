@@ -228,7 +228,7 @@ class GeometrySolver (object):
 #------------------------------------------------------------------------------
     
 def main():
-#    import timeit
+    import timeit
 #    import matplotlib.pyplot as plt
 #    from matplotlib import animation
     import geom2d
@@ -297,8 +297,16 @@ def main():
 #    plt.show()
     
     for f in xrange(N):
+        t = timeit.default_timer()
+        
         solver.modify_set_constraint(constraints[2], (MAX * (f + 1))/(N + 1))
         solver.update()
+        
+        t = timeit.default_timer() - t
+        
+        print(t)
+        print(solver.is_satisfied())
+        print('-----')
 
     # delete the circle (c1)
 #    solver.delete_geometry(geometry[4])

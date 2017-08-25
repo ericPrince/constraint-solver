@@ -40,8 +40,14 @@ def solve_numeric(eqn_set, ftol=1.0e-10):
         return [eqn() for eqn in eqn_list] + [0.0]*(len(var_list) - len(eqn_list))
 
     # solve methods: hybr, lm, (krylov used to work)
-    sol = opt.root(F, V0, args=(), method='lm')
+    sol = opt.root(F, V0, args=(), method='hybr')
     VF = sol.x
+    
+    if any(abs(f) >= ftol for f in F(VF)):
+        sol = opt.root(F, VF, args=(), method='lm')
+        VF = sol.x
+    
+    # TODO: could add last-ditch effort to use lm on V0
 
     return all(abs(f) < ftol for f in F(VF))
 
