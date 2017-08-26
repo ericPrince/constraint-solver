@@ -12,6 +12,7 @@ from math import hypot, atan2
 
 #--------------------------------------------------------------------
 # basic
+#--------------------------------------------------------------------
 
 def distance(x, d):
     (x1, y1, x2, y2) = x
@@ -23,10 +24,6 @@ def set_val(x, v):
 
 def distance_1D(x, d):
     return abs(x[1] - x[0]) - d
-
-# TODO: remove usage of these
-horz_dist = distance_1D
-vert_dist = distance_1D
 
 def offset_line_point(x, d):
     (x1, y1, x2, y2, x3, y3) = x
@@ -66,6 +63,7 @@ def point_on_line(x, p=None):
 
 #--------------------------------------------------------------------
 # non-basic
+#--------------------------------------------------------------------
 
 def point_on_circle(x, r):
     return distance(x, r)
@@ -78,7 +76,6 @@ def tangent_line_circle(x, r):
 def line_length(x, d):
     return distance(x, d)
 
-# TODO: UNTESTED!!!!
 def tangent_circle_circle(x, r1, r2):
     return min(distance(x, r1 + r2), 
                distance(x, r1 - r2))
