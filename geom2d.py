@@ -27,6 +27,8 @@ class Point (Geometry):
         ax = ax or plt.gca()
         plt.scatter(x=(self.x.val,), y=(self.y.val,)) # TODO: Point plot
 
+# TODO: add Line (instead of / in addition to, line segment)
+
 class Line_Segment (Geometry):
     def __init__(self, name, x1=0.0, y1=0.0, x2=0.0, y2=0.0):
         self.p1 = Point(name + '.p1', x1, y1)

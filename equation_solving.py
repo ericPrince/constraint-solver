@@ -1,11 +1,6 @@
 from __future__ import print_function, division
 
 #from operator import methodcaller # TODO: can use this for sort key
-
-#try:
-#    import queue
-#except:
-#    import Queue as queue
     
 # for sorted insertion: heapq, bisect, blist, sortedcontainers...
 from blist import blist#, sortedlist
@@ -16,6 +11,12 @@ from constraint_solver import solve_numeric
 #------------------------------------------------------------------------------
 # Variable, Equation, and Equation Set
 #------------------------------------------------------------------------------
+
+# TODO: additions to variable arch:
+#   - constants: easy way to define updatable/modifyable constants
+#   - dependent variables: do things like set two angles as equal?? hmm
+# implement these as subclasses of Var?
+#   -> in case of constant, it wouldn't have to be added to the solve structure?
 
 class Var (object):
     __slots__ = ( 'eqns',        # equations that are available
@@ -235,6 +236,13 @@ class EqnSet (object):
 #------------------------------------------------------------------------------
 # Equation Set Splitting
 #------------------------------------------------------------------------------
+
+# TODO: architecture change:
+#   - stop treating uc set differently, instead have multiple uc sets
+#      - then when an eqn is added, find the set(s) it would cause changes to
+#        and combine those sets, then run the combo through the splitter (if needed)
+
+# TODO: add a `freeze` attribute that prevents updating...
 
 # TODO:
 # to add a constraint, figure out which (one or more) of the
