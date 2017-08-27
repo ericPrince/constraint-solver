@@ -178,7 +178,7 @@ class EqnSet (object):
         # TODO: could replace nEq with a large number
         return -self.degrees_of_freedom() + len(self.eqns)/nEq
     
-    def is_solvable(self):
+    def is_solvable(self): # TODO: rename to is_constrained?
         """Does the number of equations equal the number of variables?"""
         return len(self.vars) == len(self.eqns)
     

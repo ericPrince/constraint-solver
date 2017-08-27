@@ -3,6 +3,7 @@ import igraph
 from matplotlib import cm
 
 def create_solver_graph(gs, cmap = cm.rainbow):
+    """Return an igraph graph that represents a solved solver"""
     var_list = list(gs.vars)
     eqn_list = list(gs.eqns)
 
@@ -26,16 +27,18 @@ def create_solver_graph(gs, cmap = cm.rainbow):
     eqn_set_list = list(gs.eqn_sets)
     eqn_set_idx = {eqn_set: i for i,eqn_set in enumerate(eqn_set_list)}
     
-    # TODO: doesn't work if var.solved is None
-    g.vs['color'] = ([cmap( float(eqn_set_idx[var.solved_by]) 
-                              / len(eqn_set_list) )
+    g.vs['color'] = ([cmap( 0.3 if var.solved_by is None 
+                                else float(eqn_set_idx[var.solved_by]) 
+                                      / len(eqn_set_list) )
                       for var in var_list] 
                   
-                  +  [cmap( float(eqn_set_idx[eqn.eqn_set]) 
-                              / len(eqn_set_list) )
+                  +  [cmap( 0.6 if eqn.eqn_set is None
+                                else float(eqn_set_idx[eqn.eqn_set]) 
+                                      / len(eqn_set_list) )
                       for eqn in eqn_list])
     
-#                  + ['white'] * len(eqn_list))
+    g.vs['edge_color'] = (['black' if gs.is_constrained(var) else 'gray' for var in var_list]
+                       +  ['black'] * len(eqn_list))
     
     g.vs['size'] = [50] * len(var_list) + [20] * len(eqn_list)
     
@@ -62,10 +65,18 @@ def main():
     for v in variables:
         solver.add_variable(v)
     
+#    solver.update()
+    
     for c in constraints:
         solver.add_constraint(c)
     
+    solver.reset()
+    igraph.plot(create_solver_graph(solver), bbox=(0,0,1000,1000))
+    
     solver.update()
+    
+    print solver.is_satisfied()
+    sys.stdout.flush()
     
     igraph.plot(create_solver_graph(solver), bbox=(0,0,1000,1000))
 #    igraph.plot(create_solver_graph(solver), 'C:/Users/Prince/Downloads/solver_graph.png', bbox=(0,0,1000,1000))

@@ -7,14 +7,12 @@ class GeometrySolver (object):
                   'eqns',          # all equations
                   'eqn_sets',      # equation sets to be solved (includes uc_set)
                   
-                  'modified_vars', # set of vars which have been modified since update
-                  'modified',      # true if eqn/var has been deleted (need reset)
-                  'modified_uc',   # true if underconstrained set has been modified
+                  'modified_vars',     # set of vars which have been modified since update
+                  'modified',          # true if eqn/var has been deleted (need reset)
+                  'modified_eqn_sets', # true if underconstrained set has been modified
                   
                   'geometry',      # all geometry
-                  'constraints',   # all constraints
-                  
-                  'uc_set')        # underconstrained set
+                  'constraints')   # all constraints
     
     def __init__(self):
         self.vars     = set()
@@ -22,13 +20,12 @@ class GeometrySolver (object):
         
         self.modified_vars = set()
         self.modified      = False
-        self.modified_uc   = False
+        self.modified_eqn_sets   = set()
         
         self.geometry    = set()
         self.constraints = set()
         
-        self.uc_set = EqnSet()
-        self.eqn_sets = {self.uc_set}
+        self.eqn_sets = {EqnSet()}
         
     #--------------------------------------------
     # geometry, variable: add, modify, delete
@@ -88,19 +85,23 @@ class GeometrySolver (object):
     def add_constraint(self, cstr):
         """
         Add a constraint (which can have multiple equations)
-        
-        Sets `modified_uc` to True
         """
+        
+        for eqn in cstr.equations:
+            affected_eqn_sets = set(var.solved_by 
+                                    if var.solved_by is not None
+                                    else EqnSet().add(eqn)
+                                    for var in eqn.vars 
+                                    if var.solved_by is None 
+                                        or not var.solved_by.is_solvable())
+
+        self.combine_eqn_sets(affected_eqn_sets)
+        
         self.constraints.add(cstr)
         self.eqns.update(cstr.equations)
         
-        # TODO: check that it won't over-constrain
-        
-        for eqn in cstr.equations:
-            self.uc_set.add(eqn)
-            # TODO: do some searching to figure out where to add it
-        
-        self.modified_uc = True
+        self.update() # TODO: why is this necessary?
+#        self.modified = True
     
     def modify_set_constraint(self, cstr, val):
         """
@@ -145,7 +146,8 @@ class GeometrySolver (object):
         
         note: only valid if up to date
         """
-        return var not in self.uc_set.solves
+        # TODO: remove this function?
+        return var.solved_by is not None and var.solved_by.is_solvable()
     
     #--------------------------------------------
     # update, solve, reset
@@ -154,31 +156,29 @@ class GeometrySolver (object):
     def update(self):
         """Reset, split the unconstrained equation set, and solve all equation sets"""
         
+        # Reset (combine all eqns into one set, and undo solve status)
+        #   Do this iff the structure has been modified
         if self.modified:
             self.reset() # note: this will cause self.modified_uc to be True
         
-        if self.modified_uc:
-            # split uc set if possible...
-            self.eqn_sets.discard(self.uc_set)
+        # Split (try to split modified equation sets into smaller ones)
+        #   It is easier to solve smaller equation sets numerically
+        for eqn_set in self.modified_eqn_sets:
+            self.eqn_sets.discard(eqn_set)
+            new_sets, _ = split_equation_set(eqn_set)
+            self.eqn_sets.update(new_sets)
             
-            new_sets, self.uc_set = split_equation_set(self.uc_set)
-            
-            self.eqn_sets |= new_sets
-            self.eqn_sets.add(self.uc_set)
-            
-            self.modified_uc = False
+            # update modified vars
+            self.modified_vars.update(var for var in eqn_set.vars 
+                                      if var.solved_by in new_sets)
         
-        # solve!
+        self.modified_eqn_sets = set()
+        
+        # Solve (numerically re-solve and equation set that has modified vars)
         self.solve()
     
     def solve(self):
         """Solve all equation sets"""
-        print('~~~~~')
-        print(len(self.eqn_sets))
-        print(len(self.uc_set.eqns))
-        print(self.uc_set.is_solvable())
-        print(len(self.uc_set.vars))
-        print('~~~~~')
         solve_eqn_sets(self.eqn_sets, self.modified_vars)
         self.modified_vars = set()  
     
@@ -187,12 +187,10 @@ class GeometrySolver (object):
         Reset all variables, equations, and equation sets
         
         After this, the only equation set will be a single 
-        underconstrained set which contains all equations
-        
-        Also, `self.modified_uc` will be set to True
+        set which contains all equations
         """
-        self.uc_set = EqnSet() # underconstrained set
-        self.eqn_sets = {self.uc_set}
+        new_eqn_set = EqnSet()
+        self.eqn_sets = {new_eqn_set}
         
         for var in self.vars:
             var.reset()
@@ -201,11 +199,30 @@ class GeometrySolver (object):
             eqn.reset()
         
         for eqn in self.eqns:
-            self.uc_set.add(eqn)
+            new_eqn_set.add(eqn)
         
-        self.modified    = False
-        self.modified_uc = True
-        self.modified_vars = set(self.vars)
+        self.modified          = False
+        self.modified_eqn_sets = {new_eqn_set}
+        self.modified_vars     = set(self.vars)
+    
+    #--------------------------------------------
+    # utility
+    #--------------------------------------------
+    
+    def combine_eqn_sets(self, eqn_sets):
+        self.eqn_sets.difference_update(eqn_sets)
+        self.modified_eqn_sets.difference_update(eqn_sets)
+        
+        new_eqn_set = EqnSet()
+        
+        for eqn_set in eqn_sets:
+            for eqn in eqn_set.eqns:
+                new_eqn_set.add(eqn)
+        
+        self.eqn_sets.add(new_eqn_set)
+        self.modified_eqn_sets.add(new_eqn_set)
+        
+        return new_eqn_set
     
     #--------------------------------------------
     # display
