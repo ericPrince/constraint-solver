@@ -3,7 +3,7 @@ from __future__ import print_function
 import scipy.optimize as opt
 
 def solve_numeric(eqn_set, ftol=1.0e-10):
-    '''
+    """
     Solve an equation set numerically
 
     Parameters
@@ -15,7 +15,7 @@ def solve_numeric(eqn_set, ftol=1.0e-10):
     -------
     success: bool
         true if the equation set was solved (and its variables were updated)
-    '''
+    """
 
     eqn_list = list(eqn_set.eqns)
     var_list = list(eqn_set.vars)
