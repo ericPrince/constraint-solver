@@ -87,21 +87,19 @@ class GeometrySolver (object):
         Add a constraint (which can have multiple equations)
         """
         
+        affected_eqn_sets = set()
+        
         for eqn in cstr.equations:
-            affected_eqn_sets = set(var.solved_by 
-                                    if var.solved_by is not None
-                                    else EqnSet().add(eqn)
-                                    for var in eqn.vars 
-                                    if var.solved_by is None 
-                                        or not var.solved_by.is_solvable())
+            for var in eqn.vars:
+                if var.solved_by is None:
+                    affected_eqn_sets.add(EqnSet().add(eqn))
+                elif not var.solved_by.is_solvable():
+                    affected_eqn_sets.add(var.solved_by)
 
         self.combine_eqn_sets(affected_eqn_sets)
         
         self.constraints.add(cstr)
         self.eqns.update(cstr.equations)
-        
-        self.update() # TODO: why is this necessary?
-#        self.modified = True
     
     def modify_set_constraint(self, cstr, val):
         """
@@ -112,8 +110,6 @@ class GeometrySolver (object):
         cstr.val     = val
         cstr.var.val = val
         self.modified_vars.add(cstr.var)
-        # TODO: could change "set" constraint to a constraint
-        #   that signals that its variable shouldn't change !?!?
     
     def delete_constraint(self, cstr):
         """
@@ -212,6 +208,8 @@ class GeometrySolver (object):
     def combine_eqn_sets(self, eqn_sets):
         self.eqn_sets.difference_update(eqn_sets)
         self.modified_eqn_sets.difference_update(eqn_sets)
+        
+        # TODO: change the ref of vars to the eqn set to be to the combined one
         
         new_eqn_set = EqnSet()
         
