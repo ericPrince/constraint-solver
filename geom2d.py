@@ -50,21 +50,16 @@ class Line_Segment (Geometry):
         self.p1.draw(ax)
         self.p2.draw(ax)
 
-class Radius (Geometry):
-    def __init__(self, name, r=1.0):
-        self.r = Var(name + '.r', r)
-        self.vars = [self.r]
-
 class Circle (Geometry):
     def __init__(self, name, cx=0.0, cy=0.0, cr=1.0):
         self.p = Point(name + '.p', cx, cy)
-        self.r = Radius(name + '.r', cr)
-        self.vars = [self.p.x, self.p.y, self.r.r]
+        self.r = Var(name + '.r', cr)
+        self.vars = [self.p.x, self.p.y, self.r]
 
     def draw(self, ax=None):
         ax = ax or plt.gca()
         circle = plt.Circle((self.p.x.val, self.p.y.val), 
-                            self.r.r.val, 
+                            self.r.val, 
                             fill=None)
         ax.add_artist(circle)
         self.p.draw(ax)
@@ -139,7 +134,7 @@ class TangentLineCircle (Constraint):
         self.C = C
 
         self.equations = [
-            Eqn(name, lambda Lx1,Ly1,Lx2,Ly2,cx,cy,cr : cstr.tangent_line_circle([Lx1,Ly1,Lx2,Ly2,cx,cy], cr), [L.p1.x,L.p1.y,L.p2.x,L.p2.y,C.p.x,C.p.y,C.r.r])
+            Eqn(name, lambda Lx1,Ly1,Lx2,Ly2,cx,cy,cr : cstr.tangent_line_circle([Lx1,Ly1,Lx2,Ly2,cx,cy], cr), [L.p1.x,L.p1.y,L.p2.x,L.p2.y,C.p.x,C.p.y,C.r])
         ]
 
 class PointOnCircle (Constraint):
@@ -148,7 +143,7 @@ class PointOnCircle (Constraint):
         self.C = C
 
         self.equations = [
-            Eqn(name, lambda x,y,cx,cy,cr: cstr.point_on_circle([x,y,cx,cy], cr), [p.x,p.y,C.p.x,C.p.y,C.r.r])
+            Eqn(name, lambda x,y,cx,cy,cr: cstr.point_on_circle([x,y,cx,cy], cr), [p.x,p.y,C.p.x,C.p.y,C.r])
         ]
 
 class GroundPoint (Constraint):

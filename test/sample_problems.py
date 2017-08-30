@@ -34,7 +34,7 @@ def problem2():
 
     f1  = g2d.SetVar('f1', p0.x, 0.0)
     f2  = g2d.SetVar('f2', p0.y, 0.0)
-    f3  = g2d.SetVar('f3', c1.r.r, r0)
+    f3  = g2d.SetVar('f3', c1.r, r0)
     f4  = g2d.SetVar('f4', d1, d)
     f5  = g2d.SetVar('f5', a1, a)
     f67 = g2d.CoincidentPoint2('f67', p0, c1.p)
