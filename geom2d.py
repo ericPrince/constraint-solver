@@ -104,10 +104,6 @@ class VertDist (Constraint):
             Eqn(name, lambda y1,y2,d: cstr.distance_1D([y1,y2],d), [p1.y,p2.y,d])
         ]
 
-# TODO: creating the constraint could/should add a/d as var!
-#  - constraint could have a special var list that gets added when constraint added!!! yes
-# TODO: could/should create constant class
-
 class LineLength (Constraint):
     def __init__(self, name, L, d):
         self.L = L
@@ -147,7 +143,16 @@ class PointOnCircle (Constraint):
         ]
 
 class GroundPoint (Constraint):
-    pass # TODO: make this, or no?
+    # note: untested
+    def __init__(self, name, p):
+        self.p = p
+        self.gx = p.x.val
+        self.gy = p.y.val
+        
+        self.equations = [
+            Eqn(name, lambda x: x - self.gx, [p.x]),
+            Eqn(name, lambda y: y - self.gy, [p.y]),
+        ]
 
 class CoincidentPoint2 (Constraint):
     def __init__(self, name, p1, p2):

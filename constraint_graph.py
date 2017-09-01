@@ -37,7 +37,7 @@ def create_solver_graph(gs, cmap = cm.rainbow):
                                       / len(eqn_set_list) )
                       for eqn in eqn_list])
     
-    g.vs['edge_color'] = (['black' if gs.is_constrained(var) else 'gray' for var in var_list]
+    g.vs['edge_color'] = (['black' if var.is_constrained() else 'gray' for var in var_list]
                        +  ['black'] * len(eqn_list))
     
     g.vs['size'] = [50] * len(var_list) + [20] * len(eqn_list)

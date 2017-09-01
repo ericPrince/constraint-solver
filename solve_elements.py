@@ -1,3 +1,5 @@
+from __future__ import division
+
 #------------------------------------------------------------------------------
 # Variable, Equation, and Equation Set
 #------------------------------------------------------------------------------
@@ -9,6 +11,21 @@
 #   -> in case of constant, it wouldn't have to be added to the solve structure?
 
 class Var (object):
+    """
+    Node of an equation system solver that represents a variable
+    
+    A var keeps track of the equation nodes it is attached to, and
+    as variables and equations become solved/constrained, it keeps
+    track of which equation nodes are reachable and not solved yet.
+    
+    Once a var is solved (aka assigned to an equation set that it is
+    actually variable in), it keeps track of with equation set solves
+    for it and which equation sets require it to be solved before they
+    can solve for their variables.
+    
+    A var also tracks the actual value assigned to the variable.
+    """
+    
     __slots__ = ( 'eqns',        # equations that are available
                   'all_eqns',    # all equations
                   
@@ -57,11 +74,25 @@ class Var (object):
         
         self.eqns -= eqn_set.eqns
     
+    def is_constrained(self):
+        """Is this var solved by a constrained equation set"""
+        return self.solved_by is not None and self.solved_by.is_constrained()
+    
     def __str__(self):
         return 'Var:' + self.name + '=' + str(self.val)
             
 
 class Eqn (object):
+    """
+    Node of an equation system solver that represents an equation
+    
+    An eqn keeps track of the variables that are required for
+    calculating whether of not the equation is solved. As vars and
+    equations get solved, it keeps track of which vars connected
+    to it still need to be solved for. Once an eqn is set as solved,
+    it keeps track of the equation set that solves it
+    """
+    
     __slots__ = ( 'vars',      # set of active vars
                   'all_vars',  # set of all vars
                   'var_list',  # list of vars in order
@@ -106,10 +137,29 @@ class Eqn (object):
         self.vars = self.all_vars.copy()
         self.eqn_set = None
     
+    def is_satisfied(self, tol=1.0e-6):
+        """Is this equation satisfied within tolerance"""
+        return abs(self()) < tol
+    
     def __str__(self):
         return 'Eqn:' + self.name
 
 class EqnSet (object):
+    """
+    A set of Vars and Eqns
+    
+    In its most general sense, an EqnSet represents a set of
+    unsolved equations and vars. However, an EqnSet can be set
+    as solved, which freezes it and its set of vars and eqns.
+    
+    EqnSet also provides functionality for searching for constrained
+    equation sets (ones with the same number of variables and 
+    equations). In particular, it contains a key function for
+    sorting, and a frontier function which returns all EqnSets
+    that are "reachable" from this one (by adding each Eqn that
+    is connected to at least one Var in the EqnSet).
+    """
+    
     __slots__ = ( 'eqns',       # unsolved eqns in this set
                   'vars',       # unsolved vars in this set
                   'all_vars',   # all vars in this set
@@ -126,7 +176,7 @@ class EqnSet (object):
         self.requires = set()
         
     def add(self, eqn):
-        """Add an equation to this equation set"""
+        """Add an equation to this equation set and return this"""
         self.eqns.add(eqn)
         self.vars     |= eqn.vars
         self.all_vars |= eqn.all_vars
@@ -166,7 +216,7 @@ class EqnSet (object):
         """The number of degrees of freedom of this set (#var - #eq)"""
         return len(self.vars) - len(self.eqns)
     
-    def key(self, nEq):
+    def key(self, nEq=None):
         """
         Sorting key: value of key is higher for sets with more degrees of freedom
         
@@ -175,10 +225,9 @@ class EqnSet (object):
         for the key for all equation sets being used
         """
         # last term is tie-breaker to value sets with more equations
-        # TODO: could replace nEq with a large number
-        return -self.degrees_of_freedom() + len(self.eqns)/nEq
+        return -self.degrees_of_freedom() + (len(self.eqns)/nEq if nEq else 0.0)
     
-    def is_solvable(self): # TODO: rename to is_constrained?
+    def is_constrained(self):
         """Does the number of equations equal the number of variables?"""
         return len(self.vars) == len(self.eqns)
     
@@ -186,9 +235,9 @@ class EqnSet (object):
         """Does this equation set have no equations?"""
         return len(self.eqns) == 0
     
-    def is_satisfied(self):
+    def is_satisfied(self, tol=1.0e-6):
         """Are all equations currently satisfied?"""
-        return all(eqn() < 1.0e-6 for eqn in self.eqns) # TODO: tolerance parameter
+        return all(eqn.is_satisfied() for eqn in self.eqns)
     
     def set_solved(self):
         """Set solves and requires based on the current state"""
@@ -214,8 +263,8 @@ class EqnSet (object):
         self.vars -= eqn_set.vars
         self.eqns -= eqn_set.eqns
     
-    def __bool__(self):
-        return not self.is_empty() # True if not empty
+    def __len__(self):
+        return len(self.eqns)
     
     def __str__(self):
         return 'Eqn_Set:\n eqns: [' + ', '.join([str(eqn) for eqn in self.eqns]) \
