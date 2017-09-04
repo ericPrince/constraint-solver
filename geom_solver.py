@@ -1,30 +1,31 @@
 from __future__ import print_function, division
 
-from equation_solving import ( EqnSet, 
-                               split_equation_set, 
-                               solve_eqn_sets, 
+from equation_solving import ( EqnSet,
+                               split_equation_set,
+                               solve_eqn_sets,
                                solve_eqn_set )
+
 
 class GeometrySolver (object):
     """
     Manager for solving systems of equations
     """
-    
-    __slots__ = ( 
+
+    __slots__ = (
         'vars',              # all vars
         'eqns',              # all equations
         'eqn_sets',          # equation sets to be solved (includes uc_set)
-                  
-        'modified_vars',     # set of vars which have been modified since update
+
+        'modified_vars',     # set of vars modified since update
         'modified',          # true if eqn/var has been deleted (need reset)
         'modified_eqn_sets', # true if underconstrained set has been modified
-                 
+
         'geometry',          # all geometry
         'constraints',       # all constraints
-                 
+
         'split_func',        # function that splits equation sets
         'solve_func',        # function that solves a single equation set
-                 
+
         'solve_tol',         # tolerance for deciding an equation is solved
     )
     
@@ -36,9 +37,9 @@ class GeometrySolver (object):
         self.eqns     = set()
         self.eqn_sets = {EqnSet()}
         
-        self.modified_vars = set()
-        self.modified      = False
-        self.modified_eqn_sets   = set()
+        self.modified_vars     = set()
+        self.modified          = False
+        self.modified_eqn_sets = set()
         
         self.geometry    = set()
         self.constraints = set()
@@ -164,7 +165,7 @@ class GeometrySolver (object):
         # Reset (combine all eqns into one set, and undo solve status)
         #   Do this iff the structure has been modified
         if self.modified:
-            self.reset() # note: this will cause self.modified_uc to be True
+            self.reset()
         
         # Split (try to split modified equation sets into smaller ones)
         #   It is easier to solve smaller equation sets numerically
@@ -174,7 +175,7 @@ class GeometrySolver (object):
             self.eqn_sets.update(new_sets)
             
             # update modified vars
-            self.modified_vars.update(var for var in eqn_set.vars 
+            self.modified_vars.update(var for var in eqn_set.vars
                                       if var.solved_by in new_sets)
         
         self.modified_eqn_sets = set()
@@ -186,8 +187,8 @@ class GeometrySolver (object):
     def reset(self):
         """
         Reset all variables, equations, and equation sets
-        
-        After this, the only equation set will be a single 
+
+        After this, the only equation set will be a single
         set which contains all equations
         """
         new_eqn_set = EqnSet()
@@ -251,7 +252,7 @@ class GeometrySolver (object):
              \
              + '\n    EqnSets:\n        ' \
              + '\n        '.join('\n        '.join(
-                      ['EqnSet:'] 
+                      ['EqnSet:']
                       + ['    Eqns:'] + ['        ' + str(eqn) for eqn in eqn_set.eqns]
                       + ['    Vars:'] + ['        ' + str(var) for var in eqn_set.vars]
                       )
