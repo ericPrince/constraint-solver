@@ -7,10 +7,10 @@ def create_solver_graph(gs, cmap = cm.rainbow):
     var_list = list(gs.vars)
     eqn_list = list(gs.eqns)
 
-    var_idx = {var: i                for i,var in enumerate(var_list)}
-    eqn_idx = {eqn: i + len(gs.vars) for i,eqn in enumerate(eqn_list)}
+    var_idx = {var: i                 for i,var in enumerate(var_list)}
+    eqn_idx = {eqn: i + len(var_list) for i,eqn in enumerate(eqn_list)}
     
-    g = igraph.Graph(len(gs.vars) + len(gs.eqns))
+    g = igraph.Graph(len(var_list) + len(eqn_list))
     
     for eqn in gs.eqns:
         g.add_edges((eqn_idx[eqn], var_idx[var]) for var in eqn.all_vars)
@@ -57,7 +57,7 @@ def main():
     
     geometry, variables, constraints, all_vars = samples.problem2()
     
-    solver = gs.GeometrySolver()
+    solver = gs.GCS()
     
     for g in geometry:
         solver.add_geometry(g)
@@ -71,15 +71,15 @@ def main():
         solver.add_constraint(c)
     
     solver.reset()
-    igraph.plot(create_solver_graph(solver), bbox=(0,0,1000,1000))
+    igraph.plot(create_solver_graph(solver.solver), bbox=(0,0,1000,1000))
     
     solver.update()
     
     print solver.is_satisfied()
     sys.stdout.flush()
     
-    igraph.plot(create_solver_graph(solver), bbox=(0,0,1000,1000))
-#    igraph.plot(create_solver_graph(solver), 'C:/Users/Prince/Downloads/solver_graph.png', bbox=(0,0,1000,1000))
+    igraph.plot(create_solver_graph(solver.solver), bbox=(0,0,1000,1000))
+#    igraph.plot(create_solver_graph(solver.solver), 'C:/Users/Prince/Downloads/solver_graph.png', bbox=(0,0,1000,1000))
     
     
     solver.draw()

@@ -1,5 +1,23 @@
 from __future__ import division
 
+"""
+Classes that act as nodes in a system-of-equations solve-graph.
+
+Var nodes are connected to Eqn nodes, and vice versa. Eqn nodes
+are grouped together to make EqnSets, and when an A* search is
+performed, constrained equation sets are found which can be solved.
+
+As the search is performed, the nodes track the implicit heirarchy:
+each variable has one equation set that solves for it, and a variable
+may be required to be solved for before an EqnSet can be solved.
+
+The idea is that a large system of equations can be broken down into
+smaller constrained equation sets which can be more quickly solved in
+the correct order. An additional benefit of splitting up the system is
+that when a variable or equation is modified/deleted, only part of the
+system's topology has to be rearranged and/or re-solved.
+"""
+
 #------------------------------------------------------------------------------
 # Variable, Equation, and Equation Set
 #------------------------------------------------------------------------------
@@ -161,8 +179,8 @@ class EqnSet (object):
 
     EqnSet also provides functionality for searching for constrained
     equation sets (ones with the same number of variables and
-    equations). In particular, it contains a key function for
-    sorting, and a frontier function which returns all EqnSets
+    equations). In particular, it contains a `key` function for
+    sorting, and a `frontier` function which returns all EqnSets
     that are "reachable" from this one (by adding each Eqn that
     is connected to at least one Var in the EqnSet).
     """
