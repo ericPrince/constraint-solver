@@ -7,17 +7,19 @@ import timeit
 
 import matplotlib.pyplot as plt
 from matplotlib import animation
+import igraph
 
 sys.path.append('..')
 
 import geom2d
 import geom_solver as gs
 import sample_problems as samples
+import constraint_graph as cg
 
 def main():
     geometry, variables, constraints, all_vars = samples.problem2()
     
-    solver = gs.GeometrySolver()
+    solver = gs.GCS()
     
     for g in geometry:
         solver.add_geometry(g)
@@ -46,11 +48,15 @@ def main():
 #    solver.modified=True
 #    solver.reset()
     solver.update()
-    print(solver.is_satisfied())
-    print('@@@@@@@@')
-    for eqn_set in solver.eqn_sets:
-        print(sorted(eqn.name for eqn in eqn_set.eqns))
-    print('@@@@@@@@')
+#    print(solver.is_satisfied())
+#    print('@@@@@@@@')
+#    for eqn_set in solver.eqn_sets:
+#        print(sorted(eqn.name for eqn in eqn_set.eqns))
+#    print('@@@@@@@@')
+#    solver.reset() # TODO: why is reset needed?
+#    solver.update()
+    igraph.plot(cg.create_solver_graph(solver.solver), bbox=(0,0,1000,1000))
+
     solver.draw()
     plt.axis('equal')
     sys.stdout.flush()
@@ -58,13 +64,13 @@ def main():
     
 #    solver.modify_set_constraint(constraints[2], 0.74)
     solver.add_constraint(geom2d.PointOnCircle('f12', geometry[3], geometry[4]))
-    solver.modified = True
+#    solver.modified = True
     solver.update()
-    print(solver.is_satisfied())
-    print('@@@@@@@@')
-    for eqn_set in solver.eqn_sets:
-        print(sorted(eqn.name for eqn in eqn_set.eqns))
-    print('@@@@@@@@')
+#    print(solver.is_satisfied())
+#    print('@@@@@@@@')
+#    for eqn_set in solver.eqn_sets:
+#        print(sorted(eqn.name for eqn in eqn_set.eqns))
+#    print('@@@@@@@@')
     solver.draw()
     plt.axis('equal')
     sys.stdout.flush()
@@ -128,21 +134,21 @@ def main():
 #        eqn.vars     = set(eqn.var_list)
 #        eqn.all_vars = set(eqn.var_list)
 #    solver.add_constraint(cstr_del) # TODO!
-    solver.modified = True # TODO: issue has to do with variables/eqns in uc set not being reset!
+#    solver.modified = True # TODO: issue has to do with variables/eqns in uc set not being reset!
 #    solver.reset()
-    print('++++')          #   but also need to improve robustness of solver
-    print(len(solver.uc_set.vars))
-    print('++++')
+#    print('++++')          #   but also need to improve robustness of solver
+#    print(len(solver.uc_set.vars))
+#    print('++++')
 #    for eqn in solver.uc_set.eqns:
 #        for var in solver.uc_set.vars:
 #            if var in eqn.all_vars:
 #                eqn.vars.add(var)
     solver.update()
-    print(solver.is_satisfied())
-    print('@@@@@@@@')
-    for eqn_set in solver.eqn_sets:
-        print(sorted(eqn.name for eqn in eqn_set.eqns))
-    print('@@@@@@@@')
+#    print(solver.is_satisfied())
+#    print('@@@@@@@@')
+#    for eqn_set in solver.eqn_sets:
+#        print(sorted(eqn.name for eqn in eqn_set.eqns))
+#    print('@@@@@@@@')
     solver.draw()
     plt.axis('equal')
     sys.stdout.flush()

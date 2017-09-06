@@ -86,7 +86,7 @@ class Solver (object):
             for var in eqn.vars:
                 if var.solved_by is None:
                     affected_eqn_sets.add(EqnSet().add(eqn))
-                elif not var.solved_by.is_solvable():
+                elif not var.solved_by.is_constrained():
                     affected_eqn_sets.add(var.solved_by)
 
         self.combine_eqn_sets(affected_eqn_sets)

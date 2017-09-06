@@ -14,10 +14,6 @@ from solve_elements    import EqnSet
 #------------------------------------------------------------------------------
 
 # TODO:
-# to add a constraint, figure out which (one or more) of the
-# unsolved sets are affected, combine them, and then run through
-# the split function (and then solve, i guess)
-#
 # add ability to have groups of constraints pre-solved algebraically
 #
 # add optional sympy representation of constraints
@@ -74,6 +70,25 @@ def split_equation_set(eqn_set):
             underconstrained_set.add(eqn)
 
         underconstrained_set.set_solved()
+        solve_sets.add(underconstrained_set)
+    
+#    while unsolved_eqns:
+#        eqn = unsolved_eqns.pop()
+#        eqn_set = EqnSet()
+#        
+#        connected_eqns = {eqn}
+#        
+#        while connected_eqns:
+#            eqn = connected_eqns.pop()
+#            unsolved_eqns.discard(eqn)
+#            eqn_set.add(eqn)
+#            
+#            for var in eqn.vars:
+#                connected_eqns.update(eqn for eqn in var.eqns 
+#                                          if  eqn not in eqn_set.eqns)
+        
+        eqn_set.set_solved()
+        solve_sets.add(eqn_set)
 
     return solve_sets
 
