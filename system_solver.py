@@ -80,16 +80,32 @@ class Solver (object):
     def add_equations(self, eqns):
         """Add multiple equations"""
 
-        affected_eqn_sets = set()
-
+        # single uc eqn set:
         for eqn in eqns:
-            for var in eqn.vars:
-                if var.solved_by is None:
-                    affected_eqn_sets.add(EqnSet().add(eqn))
-                elif not var.solved_by.is_constrained():
-                    affected_eqn_sets.add(var.solved_by)
-
-        self.combine_eqn_sets(affected_eqn_sets)
+            uc_set = None
+            for eqn_set in self.eqn_sets:
+                if not eqn_set.is_constrained():
+                    uc_set = eqn_set
+                    break
+            
+            if not uc_set:
+                uc_set = EqnSet()
+                self.eqn_sets.add(uc_set)
+            
+            uc_set.add(eqn)
+            self.modified_eqn_sets.add(uc_set)
+                
+        # multiple eqn sets:
+#        affected_eqn_sets = set()
+#
+#        for eqn in eqns:
+#            for var in eqn.vars:
+#                if var.solved_by is None:
+#                    affected_eqn_sets.add(EqnSet().add(eqn))
+#                elif not var.solved_by.is_constrained():
+#                    affected_eqn_sets.add(var.solved_by)
+#
+#        self.combine_eqn_sets(affected_eqn_sets)
 
         self.eqns.update(eqns)
 

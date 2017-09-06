@@ -65,12 +65,16 @@ def main():
 #    solver.modify_set_constraint(constraints[2], 0.74)
     solver.add_constraint(geom2d.PointOnCircle('f12', geometry[3], geometry[4]))
 #    solver.modified = True
+    solver.reset() # TODO: why necessary?
     solver.update()
 #    print(solver.is_satisfied())
 #    print('@@@@@@@@')
 #    for eqn_set in solver.eqn_sets:
 #        print(sorted(eqn.name for eqn in eqn_set.eqns))
 #    print('@@@@@@@@')
+
+    igraph.plot(cg.create_solver_graph(solver.solver), bbox=(0,0,1000,1000))
+
     solver.draw()
     plt.axis('equal')
     sys.stdout.flush()

@@ -86,9 +86,9 @@ def split_equation_set(eqn_set):
 #            for var in eqn.vars:
 #                connected_eqns.update(eqn for eqn in var.eqns 
 #                                          if  eqn not in eqn_set.eqns)
-        
-        eqn_set.set_solved()
-        solve_sets.add(eqn_set)
+#        
+#        eqn_set.set_solved()
+#        solve_sets.add(eqn_set)
 
     return solve_sets
 
