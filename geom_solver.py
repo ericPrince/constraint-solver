@@ -6,7 +6,11 @@ from system_solver    import Solver
 class GCS (object):
     """Geometric constraint solver (GCS)"""
     
-    __slots__ = ('geometry', 'constraints', 'solver')
+    __slots__ = (
+        'geometry',    # set of geometry elements in the system
+        'constraints', # set of constraints in the system
+        'solver',      # underlying Solver object
+    )
     
     def __init__(self, 
                  split_func = split_equation_set, 
@@ -16,7 +20,9 @@ class GCS (object):
         self.geometry    = set()
         self.constraints = set()
         
-        self.solver = Solver(split_func, solve_func, solve_tol)
+        self.solver = Solver(split_func, 
+                             solve_func, 
+                             solve_tol)
         
     #--------------------------------------------
         
@@ -51,6 +57,7 @@ class GCS (object):
     
     def modify_set_constraint(self, cstr, val):
         """Modify the value of a "set" constraint"""
+        # TODO: replace "set" constraints with "constant" constraints
         cstr.val = val
         self.solver.modify_variable(cstr.var, val)
     
@@ -63,6 +70,11 @@ class GCS (object):
     
     def is_satisfied(self):
         return self.solver.is_satisfied()
+
+    def is_constrained(self):
+        return self.solver.is_constrained()
+    
+    #--------------------------------------------
     
     def update(self):
         self.solver.update()

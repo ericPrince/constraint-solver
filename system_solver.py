@@ -8,7 +8,46 @@ from equation_solving import ( split_equation_set,
 
 
 class Solver (object):
-    """Manager for solving systems of equations"""
+    """
+    Manager for solving systems of equations
+    
+    Methods
+    =======
+    
+    Variables
+    ---------
+    add_variable(self, var): 
+        add a single Var
+    add_variables(self, vars): 
+        add an iterable of Vars
+    modify_variable(self, var, val):
+        modify the value of a Var
+    delete_variable(self, var):
+        delete a variable
+    
+    Equations
+    ---------
+    add_equation(self, eqn):
+        add an Eqn
+    add_equations(self, eqns):
+        add an iterable of Eqns
+    delete_equation(self, eqn):
+        delete an Eqn
+    delete_equations(self, eqns):
+        delete all elements in an iterable of Eqns
+    
+    Status
+    ------
+    is_satisfied(self):
+        Are all equations satisfied
+    is_constrained(self):
+        Is this a constrained system (equal number of Vars and Eqns)
+    
+    Update
+    ------
+    update(self):
+        Update/reset/solve this system
+    """
 
     __slots__ = (
         'vars',               # all vars
@@ -29,17 +68,18 @@ class Solver (object):
                  split_func = split_equation_set, 
                  solve_func = solve_eqn_set,
                  solve_tol  = 1.0e-6):
+
         self.vars     = set()
         self.eqns     = set()
-        self.eqn_sets = {EqnSet()}
-        
+        self.eqn_sets = set()
+
         self.modified_vars     = set()
         self.modified          = False
         self.modified_eqn_sets = set()
-        
+
         self.split_func  = split_func
         self.solve_func  = solve_func
-        
+
         self.solve_tol = solve_tol
 
     #--------------------------------------------
@@ -94,6 +134,9 @@ class Solver (object):
             
             uc_set.add(eqn)
             self.modified_eqn_sets.add(uc_set)
+            
+            if uc_set.is_constrained():
+                uc_set.set_solved()
                 
         # multiple eqn sets:
 #        affected_eqn_sets = set()
@@ -108,6 +151,7 @@ class Solver (object):
 #        self.combine_eqn_sets(affected_eqn_sets)
 
         self.eqns.update(eqns)
+        self.modified = True
 
     def delete_equation(self, eqn):
         """Delete an equation from the system"""
@@ -133,6 +177,10 @@ class Solver (object):
         """Are all equations satisfied?"""
         return all(eqn.is_satisfied(self.solve_tol) for eqn in self.eqns)
 
+    def is_constrained(self):
+        """Is the solve system constrained?"""
+        return len(self.eqns) == len(self.vars)
+
     #--------------------------------------------
     # update, solve, reset
     #--------------------------------------------
@@ -152,7 +200,7 @@ class Solver (object):
             new_sets = self.split_func(eqn_set)
             self.eqn_sets.update(new_sets)
 
-            # update modified vars
+            # update modified vars - TODO: is this necessary?
             self.modified_vars.update(var for var in eqn_set.vars
                                       if var.solved_by in new_sets)
 
@@ -188,7 +236,7 @@ class Solver (object):
     #--------------------------------------------
     # utility
     #--------------------------------------------
-
+'''
     def combine_eqn_sets(self, eqn_sets):
         """
         Combine equation sets into a single new one
@@ -231,4 +279,6 @@ class Solver (object):
                 pass
 
         return new_eqn_set
+'''
 
+pass # class Solver
