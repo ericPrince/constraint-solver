@@ -6,8 +6,8 @@ from operator import methodcaller
 from blist import blist#, sortedlist
 from sortedcontainers import SortedList as sortedlist
 
-from constraint_solver import solve_numeric
-from solve_elements    import EqnSet
+from .constraint_solver import solve_numeric
+from .solve_elements    import EqnSet
 
 #------------------------------------------------------------------------------
 # Equation Set Splitting

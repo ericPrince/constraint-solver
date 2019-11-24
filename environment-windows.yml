@@ -1,0 +1,18 @@
+# python-igraph's official pypi and conda-forge packages do not
+# build correctly on windows. They recommend to use unofficial wheels:
+#
+# https://www.lfd.uci.edu/~gohlke/pythonlibs/#python-igraph
+#
+# The wheels are stored in this repo in igraph-whl/
+
+name: gcs
+channels:
+  - defaults
+dependencies:
+  - python>=3.6
+  - pip
+  - numpy
+  - scipy
+  - matplotlib
+  - blist
+  - sortedcontainers

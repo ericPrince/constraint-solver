@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt # TODO: add/remove this for profiling
 
 from solve_elements import Eqn, Var
 
+import sys
+sys.path.append(r'D:\Documents')
+from ccad import model
+
 #----------------------------------------------------------
 # Geometry
 #----------------------------------------------------------
@@ -15,8 +19,11 @@ class Geometry (object):
         self.vars = []
         self.name = name
 
-    def draw(self, ax=None):
+    def plot(self, ax=None):
         ax = ax or plt.gca()
+
+    def draw(self, view):
+        pass
 
     def delete(self):
         for var in self.vars:
@@ -29,9 +36,15 @@ class Point (Geometry):
         self.vars = [self.x, self.y]
         self.name = name
 
-    def draw(self, ax=None):
+    def plot(self, ax=None):
         ax = ax or plt.gca()
         plt.scatter(x=(self.x.val,), y=(self.y.val,))
+
+    def draw(self, view):
+        pass
+        self.geom = model.vertex([self.x.val, self.y.val, 0])
+        view.display(self.geom)
+
 
 # TODO: add Line (instead of / in addition to, line segment)
 
@@ -42,13 +55,20 @@ class Line_Segment (Geometry):
         self.vars = [self.p1.x, self.p1.y, self.p2.x, self.p2.y]
         self.name = name
 
-    def draw(self, ax=None):
+    def plot(self, ax=None):
         ax = ax or plt.gca()
-        line = plt.Line2D(xdata=(self.p1.x.val, self.p2.x.val), 
+        line = plt.Line2D(xdata=(self.p1.x.val, self.p2.x.val),
                           ydata=(self.p1.y.val, self.p2.y.val))
         ax.add_artist(line)
-        self.p1.draw(ax)
-        self.p2.draw(ax)
+        self.p1.plot(ax)
+        self.p2.plot(ax)
+
+    def draw(self, view):
+        self.geom = model.segment(
+            [self.p1.x.val, self.p1.y.val, 0],
+            [self.p2.x.val, self.p2.y.val, 0]
+        )
+        view.display(self.geom)
 
 class Circle (Geometry):
     def __init__(self, name, cx=0.0, cy=0.0, cr=1.0):
@@ -56,13 +76,18 @@ class Circle (Geometry):
         self.r = Var(name + '.r', cr)
         self.vars = [self.p.x, self.p.y, self.r]
 
-    def draw(self, ax=None):
+    def plot(self, ax=None):
         ax = ax or plt.gca()
-        circle = plt.Circle((self.p.x.val, self.p.y.val), 
-                            self.r.val, 
+        circle = plt.Circle((self.p.x.val, self.p.y.val),
+                            self.r.val,
                             fill=None)
         ax.add_artist(circle)
-        self.p.draw(ax)
+        self.p.plot(ax)
+
+    def draw(self, view):
+        self.geom = model.circle(self.r.val)
+        self.geom.translate([self.p.x.val, self.p.y.val, 0])
+        view.display(self.geom)
 
 #----------------------------------------------------------
 # Constraints
@@ -110,7 +135,7 @@ class LineLength (Constraint):
         self.d = d
 
         self.equations = [
-            Eqn(name, lambda Lx1,Ly1,Lx2,Ly2,d: cstr.line_length([Lx1,Ly1,Lx2,Ly2], d), [L.p1.x,L.p1.y,L.p2.x,L.p2.y,d]) 
+            Eqn(name, lambda Lx1,Ly1,Lx2,Ly2,d: cstr.line_length([Lx1,Ly1,Lx2,Ly2], d), [L.p1.x,L.p1.y,L.p2.x,L.p2.y,d])
         ]
 
 class AnglePoint3 (Constraint):
@@ -148,7 +173,7 @@ class GroundPoint (Constraint):
         self.p = p
         self.gx = p.x.val
         self.gy = p.y.val
-        
+
         self.equations = [
             Eqn(name, lambda x: x - self.gx, [p.x]),
             Eqn(name, lambda y: y - self.gy, [p.y]),
