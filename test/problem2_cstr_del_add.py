@@ -9,12 +9,13 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 import igraph
 
-import geom2d
-import geom_solver as gs
-import sample_problems as samples
-import constraint_graph as cg
+from gcs import geom2d
+from gcs import geom_solver as gs
+from gcs import sample_problems as samples
+from gcs import constraint_graph as cg
 
-from ccad import display
+# from ccad import display
+
 
 def main():
     geometry, variables, constraints, all_vars = samples.problem2()
@@ -30,9 +31,9 @@ def main():
     for c in constraints:
         solver.add_constraint(c)
 
-    v = display.view()
-    solver.draw(v)
-    display.start()
+    # v = display.view()
+    # solver.draw(v)
+    # display.start()
 
     # unsolved system
     solver.plot()
@@ -120,7 +121,7 @@ def main():
         solver.plot()
         plt.axis('equal')
 
-    anim = animation.FuncAnimation(fig, animate, xrange(N), repeat=False)
+    anim = animation.FuncAnimation(fig, animate, N, repeat=False)
     plt.show()
 
     sys.stdout.flush()
@@ -174,6 +175,7 @@ def main():
     solver.plot()
     plt.axis('equal')
     plt.show()
+
 
 if __name__ == '__main__':
     main()

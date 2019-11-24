@@ -2,16 +2,9 @@
 Use geom2d p
 """
 
-import time
+from gcs import geom_solver as gs
+from gcs import sample_problems as samples
 
-import sys
-sys.path.append('..')
-
-#import geom2d
-import geom_solver as gs
-import sample_problems as samples
-
-sys.path.append(r'D:\Documents')
 from ccad import display
 
 
@@ -44,6 +37,7 @@ def main():
     solver.draw(v)
 
 #    display.start()
+
 
 if __name__ == '__main__':
     main()

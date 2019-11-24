@@ -49,11 +49,8 @@ def create_solver_graph(gs, cmap = cm.rainbow):
 
 def main():
     import matplotlib.pyplot as plt
-    import geom_solver as gs
-    
-    import sys
-    sys.path.append('./test')
-    import sample_problems as samples
+    import gcs.geom_solver as gs
+    import gcs.sample_problems as samples
     
     geometry, variables, constraints, all_vars = samples.problem2()
     
@@ -75,7 +72,7 @@ def main():
     
     solver.update()
     
-    print solver.is_satisfied()
+    print(solver.is_satisfied())
     sys.stdout.flush()
     
     igraph.plot(create_solver_graph(solver.solver), bbox=(0,0,1000,1000))

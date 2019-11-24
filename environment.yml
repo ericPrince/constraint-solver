@@ -1,15 +1,14 @@
 name: gcs
 channels:
   - defaults
-#  - conda-forge  # for python-igraph
+ - conda-forge
 dependencies:
   - python>=3.6
   - pip
   - numpy
   - scipy
   - matplotlib
-#  - python-igraph
+  - python-igraph
   - blist
   - sortedcontainers
-#  - pip:
-#      - python-igraph
+  - pycairo

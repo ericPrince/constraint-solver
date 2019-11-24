@@ -1,6 +1,6 @@
 from math import pi
 
-import geom2d as g2d
+from . import geom2d as g2d
 
 #----------------------------------------------------------
 # Sample Problem

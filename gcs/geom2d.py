@@ -4,11 +4,14 @@ geom2d: 2D geometry and constraints built from equation solving elements
 
 import matplotlib.pyplot as plt # TODO: add/remove this for profiling
 
-from solve_elements import Eqn, Var
+from .solve_elements import Eqn, Var
+from . import constraints_unsigned as cstr
+# form . import constraints_signed   as cstr
 
-import sys
-sys.path.append(r'D:\Documents')
-from ccad import model
+try:
+    from ccad import model
+except ImportError:
+    pass
 
 #----------------------------------------------------------
 # Geometry
@@ -41,7 +44,6 @@ class Point (Geometry):
         plt.scatter(x=(self.x.val,), y=(self.y.val,))
 
     def draw(self, view):
-        pass
         self.geom = model.vertex([self.x.val, self.y.val, 0])
         view.display(self.geom)
 
@@ -93,8 +95,6 @@ class Circle (Geometry):
 # Constraints
 #----------------------------------------------------------
 
-import constraints_unsigned as cstr
-#import constraints_signed   as cstr
 
 class Constraint (object):
     def __init__(self):

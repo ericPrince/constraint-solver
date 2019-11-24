@@ -1,0 +1,19 @@
+# Installing pythonocc: http://www.pythonocc.org/download/
+
+name: gcs
+channels:
+  - defaults
+  - pythonocc
+  - conda-forge
+  - dlr-sc
+dependencies:
+  - python>=3.6
+  - pip
+  - numpy
+  - scipy
+  - matplotlib
+  - blist
+  - sortedcontainers
+  - pythonocc-core
+  - python-igraph
+  - pycairo  # needed by python-igraph
