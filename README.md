@@ -2,6 +2,8 @@
 
 Pure python geometric constraint solver
 
+`import gcs`
+
 See `gcs/solve_elements.py` for a description of the
 mechanics behind this package. Essentially, gcs implements
 a constraint solver that breaks a problem into fully 

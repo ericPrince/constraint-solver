@@ -1,4 +1,4 @@
-#note: these functions are not used, see equation_solving instead
+# note: these functions are not used, see equation_solving instead
 
 from blist import sortedlist
 
