@@ -26,9 +26,9 @@ def main():
     display.start()
 
     solver.draw(v)
-#    display.start()
+    #    display.start()
 
-#    time.sleep(1.0)
+    #    time.sleep(1.0)
 
     # solved system
     solver.update()
@@ -36,8 +36,9 @@ def main():
     v.clear()
     solver.draw(v)
 
+
 #    display.start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

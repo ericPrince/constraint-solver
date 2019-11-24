@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import scipy.optimize as opt
 
+
 def solve_numeric(eqn_set, ftol=1.0e-10):
     """
     Solve an equation set numerically
@@ -33,23 +34,24 @@ def solve_numeric(eqn_set, ftol=1.0e-10):
     V0 = [var.val for var in var_list]
 
     def F(V):
-        for var,val in zip(var_list, V):
+        for var, val in zip(var_list, V):
             var.val = val
 
         # TODO: added ability to solve underconstrained systems
-        return [eqn() for eqn in eqn_list] + [0.0]*(len(var_list) - len(eqn_list))
+        return [eqn() for eqn in eqn_list] + [0.0] * (len(var_list) - len(eqn_list))
 
     # solve methods: hybr, lm, (krylov used to work)
-    sol = opt.root(F, V0, args=(), method='hybr')
+    sol = opt.root(F, V0, args=(), method="hybr")
     VF = sol.x
-    
+
     if any(abs(f) >= ftol for f in F(VF)):
-        sol = opt.root(F, VF, args=(), method='lm')
+        sol = opt.root(F, VF, args=(), method="lm")
         VF = sol.x
-    
+
     # TODO: could add last-ditch effort to use lm on V0
 
     return all(abs(f) < ftol for f in F(VF))
+
 
 #    if sol.success:
 #        F(VF) # set values of variables

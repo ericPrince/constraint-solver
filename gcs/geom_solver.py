@@ -1,29 +1,26 @@
 from .equation_solving import split_equation_set, solve_eqn_set
-from .system_solver    import Solver
+from .system_solver import Solver
 
 
-class GCS (object):
+class GCS(object):
     """Geometric constraint solver (GCS)"""
 
     __slots__ = (
-        'geometry',    # set of geometry elements in the system
-        'constraints', # set of constraints in the system
-        'solver',      # underlying Solver object
+        "geometry",  # set of geometry elements in the system
+        "constraints",  # set of constraints in the system
+        "solver",  # underlying Solver object
     )
 
-    def __init__(self,
-                 split_func = split_equation_set,
-                 solve_func = solve_eqn_set,
-                 solve_tol  = 1.0e-6):
+    def __init__(
+        self, split_func=split_equation_set, solve_func=solve_eqn_set, solve_tol=1.0e-6
+    ):
 
-        self.geometry    = set()
+        self.geometry = set()
         self.constraints = set()
 
-        self.solver = Solver(split_func,
-                             solve_func,
-                             solve_tol)
+        self.solver = Solver(split_func, solve_func, solve_tol)
 
-    #--------------------------------------------
+    # --------------------------------------------
 
     def add_geometry(self, geom):
         """Add a new geometry element"""
@@ -36,7 +33,7 @@ class GCS (object):
         for var in geom.vars:
             self.solver.delete_variable(var)
 
-    #--------------------------------------------
+    # --------------------------------------------
 
     def add_variable(self, var):
         self.solver.add_variable(var)
@@ -47,7 +44,7 @@ class GCS (object):
     def delete_variable(self, var):
         self.solver.delete_variable(var)
 
-    #--------------------------------------------
+    # --------------------------------------------
 
     def add_constraint(self, cstr):
         """Add a new constraint to the system"""
@@ -65,7 +62,7 @@ class GCS (object):
         self.constraints.discard(cstr)
         self.solver.delete_equations(cstr.equations)
 
-    #--------------------------------------------
+    # --------------------------------------------
 
     def is_satisfied(self):
         return self.solver.is_satisfied()
@@ -73,7 +70,7 @@ class GCS (object):
     def is_constrained(self):
         return self.solver.is_constrained()
 
-    #--------------------------------------------
+    # --------------------------------------------
 
     def update(self):
         self.solver.update()
@@ -81,7 +78,7 @@ class GCS (object):
     def reset(self):
         self.solver.reset()
 
-    #--------------------------------------------
+    # --------------------------------------------
 
     def plot(self, ax=None):
         """Plot all geometry"""
