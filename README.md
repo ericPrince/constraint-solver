@@ -39,3 +39,26 @@ solver, solve it, and view its geometry and constraint graph
 on a sample problem. Makes an mpl animation showing the solver
 being updated as the constraint controlling the circle's radius
 changes
+
+### Sample Results
+
+Geometry for problem2:
+
+![problem2](images/initial-problem.png)
+
+Constraint graph before running gcs algorithm:
+
+![constraint graph](images/graph-single.png)
+
+Constraint graph split into fully constrained sets:
+
+![constraint graph solved](images/graph-split.png)
+
+Solved problem2:
+
+![problem2 solved](images/solved-problem.png)
+
+Re-solved after point-on-circle constraint removed
+and circle radius changed:
+
+![problem2 constraint removed](images/solved-problem-constraint-removed.png)
