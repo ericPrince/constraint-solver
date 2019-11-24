@@ -19,7 +19,7 @@ def problem2():
     p2 = g2d.Point("p2", 2.0, 2.0)
     p3 = g2d.Point("p3", 3.0, 3.0)
     c1 = g2d.Circle("c1", 0.0, 0.0, 1.0)
-    L1 = g2d.Line_Segment("L1", 1.0, 1.0, 3.0, 3.0)
+    L1 = g2d.LineSegment("L1", 1.0, 1.0, 3.0, 3.0)
 
     geometry = (p0, p1, p2, p3, c1, L1)
 

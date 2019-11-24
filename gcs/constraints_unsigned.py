@@ -6,8 +6,6 @@ TODO: keep abs() or should sign of parameters matter?
 
 """
 
-from __future__ import division
-
 from math import hypot, atan2
 
 # --------------------------------------------------------------------

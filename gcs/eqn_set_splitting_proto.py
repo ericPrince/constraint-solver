@@ -1,13 +1,8 @@
-from __future__ import print_function, division
+#note: these functions are not used, see equation_solving instead
 
-# from operator import methodcaller # TODO: can use this for sort key
-
-# for sorted insertion: heapq, bisect, blist, sortedcontainers...
 from blist import sortedlist
 
-# from sortedcontainers import SortedList as sortedlist
-
-from equation_solving import EqnSet
+from .solve_elements import EqnSet
 
 
 # original

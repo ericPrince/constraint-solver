@@ -1,5 +1,3 @@
-from __future__ import division
-
 """
 Classes that act as nodes in a system-of-equations solve-graph.
 
@@ -7,7 +5,7 @@ Var nodes are connected to Eqn nodes, and vice versa. Eqn nodes
 are grouped together to make EqnSets, and when an A* search is
 performed, constrained equation sets are found which can be solved.
 
-As the search is performed, the nodes track the implicit heirarchy:
+As the search is performed, the nodes track the implicit hierarchy:
 each variable has one equation set that solves for it, and a variable
 may be required to be solved for before an EqnSet can be solved.
 
@@ -238,16 +236,16 @@ class EqnSet(object):
         """The number of degrees of freedom of this set (#var - #eq)"""
         return len(self.vars) - len(self.eqns)
 
-    def key(self, nEq=None):
+    def key(self, n_eq=None):
         """
         Sorting key: value of key is higher for sets with more deg of freedom
-        
-        `nEq` is meant to be the total number of equations in a larger set
+
+        `n_eq` is meant to be the total number of equations in a larger set
         and should be at least `len(self.eqns) + 1`, and should be the same
         for the key for all equation sets being used
         """
         # last term is tie-breaker to value sets with more equations
-        return -self.degrees_of_freedom() + (len(self.eqns) / nEq if nEq else 0.0)
+        return -self.degrees_of_freedom() + (len(self.eqns) / n_eq if n_eq else 0.0)
 
     def is_constrained(self):
         """Does the number of equations equal the number of variables?"""

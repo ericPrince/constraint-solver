@@ -24,7 +24,7 @@ def split_equation_set(eqn_set):
     """Split an equation set up into smaller solvable equation sets"""
 
     # used for tiebreaker of priority key
-    nEq = len(eqn_set.eqns) + 1
+    n_eq = len(eqn_set.eqns) + 1
 
     solve_sets = set()
 
@@ -34,7 +34,7 @@ def split_equation_set(eqn_set):
 
     # Initialize priority queue with the equations in the input set
     pq = sortedlist(
-        [EqnSet().add(eqn) for eqn in eqn_set.eqns], key=methodcaller("key", nEq)
+        [EqnSet().add(eqn) for eqn in eqn_set.eqns], key=methodcaller("key", n_eq)
     )
 
     while pq:
@@ -51,7 +51,7 @@ def split_equation_set(eqn_set):
                 p.discard(eqn_set)
 
             # delete any empty eqn sets and re-sort the pq
-            pq = sortedlist(filter(None, pq), key=methodcaller("key", nEq))
+            pq = sortedlist(filter(None, pq), key=methodcaller("key", n_eq))
 
             unique_eqn_combos = set(frozenset(eqs.eqns | eqs.vars) for eqs in pq)
 
@@ -73,23 +73,23 @@ def split_equation_set(eqn_set):
         underconstrained_set.set_solved()
         solve_sets.add(underconstrained_set)
 
-    #    while unsolved_eqns:
-    #        eqn = unsolved_eqns.pop()
-    #        eqn_set = EqnSet()
+    # while unsolved_eqns:
+    #     eqn = unsolved_eqns.pop()
+    #     eqn_set = EqnSet()
     #
-    #        connected_eqns = {eqn}
+    #     connected_eqns = {eqn}
     #
-    #        while connected_eqns:
-    #            eqn = connected_eqns.pop()
-    #            unsolved_eqns.discard(eqn)
-    #            eqn_set.add(eqn)
+    #     while connected_eqns:
+    #         eqn = connected_eqns.pop()
+    #         unsolved_eqns.discard(eqn)
+    #         eqn_set.add(eqn)
     #
-    #            for var in eqn.vars:
-    #                connected_eqns.update(eqn for eqn in var.eqns
-    #                                          if  eqn not in eqn_set.eqns)
+    #         for var in eqn.vars:
+    #             connected_eqns.update(eqn for eqn in var.eqns
+    #                                       if  eqn not in eqn_set.eqns)
     #
-    #        eqn_set.set_solved()
-    #        solve_sets.add(eqn_set)
+    #     eqn_set.set_solved()
+    #     solve_sets.add(eqn_set)
 
     return solve_sets
 

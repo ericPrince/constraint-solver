@@ -5,7 +5,21 @@ from matplotlib import cm
 
 
 def create_solver_graph(gs, cmap=cm.rainbow):
-    """Return an igraph graph that represents a solved solver"""
+    """
+    Returns an igraph graph that represents a solved solver
+
+    Vertices are colored based on which constrained set
+    they belong to. Groups of variables/equations with
+    the same color belong to the same equation set and
+    will be solved together
+
+    Parameters
+    ----------
+    gs
+        Geom solver instance
+    cmap
+        Color map to use to color graph vertices
+    """
     var_list = list(gs.vars)
     eqn_list = list(gs.eqns)
 

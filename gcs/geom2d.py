@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt  # TODO: add/remove this for profiling
 from .solve_elements import Eqn, Var
 from . import constraints_unsigned as cstr
 
-# form . import constraints_signed   as cstr
+# from . import constraints_signed   as cstr
 
 try:
     from ccad import model
@@ -19,7 +19,7 @@ except ImportError:
 # ----------------------------------------------------------
 
 
-class Geometry(object):
+class Geometry:
     def __init__(self, name):
         self.vars = []
         self.name = name
@@ -37,14 +37,16 @@ class Geometry(object):
 
 class Point(Geometry):
     def __init__(self, name, x=0.0, y=0.0):
+        super().__init__(name)
+
         self.x = Var(name + ".x", x)
         self.y = Var(name + ".y", y)
+
         self.vars = [self.x, self.y]
-        self.name = name
 
     def plot(self, ax=None):
         ax = ax or plt.gca()
-        plt.scatter(x=(self.x.val,), y=(self.y.val,))
+        ax.scatter(x=(self.x.val,), y=(self.y.val,))
 
     def draw(self, view):
         self.geom = model.vertex([self.x.val, self.y.val, 0])
@@ -54,12 +56,13 @@ class Point(Geometry):
 # TODO: add Line (instead of / in addition to, line segment)
 
 
-class Line_Segment(Geometry):
+class LineSegment(Geometry):
     def __init__(self, name, x1=0.0, y1=0.0, x2=0.0, y2=0.0):
+        super().__init__(name)
+
         self.p1 = Point(name + ".p1", x1, y1)
         self.p2 = Point(name + ".p2", x2, y2)
         self.vars = [self.p1.x, self.p1.y, self.p2.x, self.p2.y]
-        self.name = name
 
     def plot(self, ax=None):
         ax = ax or plt.gca()
@@ -79,6 +82,8 @@ class Line_Segment(Geometry):
 
 class Circle(Geometry):
     def __init__(self, name, cx=0.0, cy=0.0, cr=1.0):
+        super().__init__(name)
+
         self.p = Point(name + ".p", cx, cy)
         self.r = Var(name + ".r", cr)
         self.vars = [self.p.x, self.p.y, self.r]
@@ -101,12 +106,15 @@ class Circle(Geometry):
 
 
 class Constraint(object):
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.equations = []
 
 
 class SetVar(Constraint):
     def __init__(self, name, var, val):
+        super().__init__(name)
+
         self.var = var
         self.val = val
 
@@ -115,6 +123,8 @@ class SetVar(Constraint):
 
 class HorzDist(Constraint):
     def __init__(self, name, p1, p2, d):
+        super().__init__(name)
+
         self.p1 = p1
         self.p2 = p2
         self.d = d
@@ -126,6 +136,8 @@ class HorzDist(Constraint):
 
 class VertDist(Constraint):
     def __init__(self, name, p1, p2, d):
+        super().__init__(name)
+
         self.p1 = p1
         self.p2 = p2
         self.d = d
@@ -137,6 +149,8 @@ class VertDist(Constraint):
 
 class LineLength(Constraint):
     def __init__(self, name, L, d):
+        super().__init__(name)
+
         self.L = L
         self.d = d
 
@@ -151,6 +165,8 @@ class LineLength(Constraint):
 
 class AnglePoint3(Constraint):
     def __init__(self, name, p1, p2, p3, a):
+        super().__init__(name)
+
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
@@ -169,6 +185,8 @@ class AnglePoint3(Constraint):
 
 class TangentLineCircle(Constraint):
     def __init__(self, name, L, C):
+        super().__init__(name)
+
         self.L = L
         self.C = C
 
@@ -185,6 +203,8 @@ class TangentLineCircle(Constraint):
 
 class PointOnCircle(Constraint):
     def __init__(self, name, p, C):
+        super().__init__(name)
+
         self.p = p
         self.C = C
 
@@ -200,6 +220,8 @@ class PointOnCircle(Constraint):
 class GroundPoint(Constraint):
     # note: untested
     def __init__(self, name, p):
+        super().__init__(name)
+
         self.p = p
         self.gx = p.x.val
         self.gy = p.y.val
@@ -212,6 +234,8 @@ class GroundPoint(Constraint):
 
 class CoincidentPoint2(Constraint):
     def __init__(self, name, p1, p2):
+        super().__init__(name)
+
         self.p1 = p1
         self.p2 = p2
 

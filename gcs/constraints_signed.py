@@ -6,8 +6,6 @@ TODO: add dependence on sign of parameter!!!!
 
 """
 
-from __future__ import division
-
 from math import hypot, atan2
 
 # --------------------------------------------------------------------

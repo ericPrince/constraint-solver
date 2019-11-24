@@ -2,7 +2,7 @@ from .equation_solving import split_equation_set, solve_eqn_set
 from .system_solver import Solver
 
 
-class GCS(object):
+class GCS:
     """Geometric constraint solver (GCS)"""
 
     __slots__ = (

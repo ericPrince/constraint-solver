@@ -1,9 +1,9 @@
-from __future__ import print_function
-
 import scipy.optimize as opt
 
+from .solve_elements import EqnSet
 
-def solve_numeric(eqn_set, ftol=1.0e-10):
+
+def solve_numeric(eqn_set: EqnSet, ftol=1.0e-10):
     """
     Solve an equation set numerically
 
@@ -11,6 +11,8 @@ def solve_numeric(eqn_set, ftol=1.0e-10):
     ----------
     eqn_set: EqnSet
         the equation set to solve
+    ftol
+        solver tolerance
 
     Returns
     -------
